@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: devops_db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: academic_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  auth-service:
+    build:
+      context: ../services/auth-service
+    container_name: auth_service
+    ports:
+      - "8001:8000"
+    environment:
+      - DATABASE_URL=postgresql://admin:password@db:5432/academic_db
+    depends_on:
+      - db
+
+  academic-service:
+    build:
+      context: ../services/academic-service
+    container_name: academic_service
+    ports:
+      - "8002:8000"
+    environment:
+      - DATABASE_URL=postgresql://admin:password@db:5432/academic_db
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ../frontend
+    container_name: frontend_web
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_AUTH_API_URL=http://localhost:8001
+      - VITE_ACADEMIC_API_URL=http://localhost:8002
+    depends_on:
+      - auth-service
+      - academic-service
+
+volumes:
+  postgres_data:

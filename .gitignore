@@ -1,0 +1,70 @@
+# =========================
+# Sistemas Operacionais
+# =========================
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+Desktop.ini
+.directory
+*~
+.fuse_hidden*
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# =========================
+# Editores de Código / IDEs
+# =========================
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+.idea/
+*.iml
+*.iws
+
+# =========================
+# Docker e Variáveis de Ambiente
+# =========================
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+docker-compose.override.yml
+
+# =========================
+# Python (Microsserviços)
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+pip-log.txt
+
+# =========================
+# React (Frontend)
+# =========================
+node_modules/
+build/
+dist/
+.npm/
+
+# =========================
+# Logs
+# =========================
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
