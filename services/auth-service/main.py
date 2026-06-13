@@ -63,16 +63,21 @@ def criar_usuario(usuario: UsuarioCreate, db: Session = Depends(get_db)):
         db.rollback() # Se der erro (ex: email repetido), desfaz a operação
         raise HTTPException(status_code=400, detail="Erro ao criar usuário. Email já existe?")
 
-# 4. Rota principal de Login
+# A rota de login agora recebe a injeção do banco de dados (db: Session)
 @app.post("/login")
-def login(request: LoginRequest):
-    # Verifica se o email existe e se a senha bate
-    if request.email in USUARIOS_MOCK and USUARIOS_MOCK[request.email] == request.senha:
-        return {
-            "mensagem": "Login aprovado!",
-            "token": "token-jwt-simulado-12345",
-            "usuario": request.email
-        }
+def login(req: LoginRequest, db: Session = Depends(get_db)):
+    # 1. Fazemos uma "query" (consulta) real no banco de dados buscando o email
+    usuario_db = db.query(models.Usuario).filter(models.Usuario.email == req.email).first()
+
+    # 2. Verificamos se o usuário não foi encontrado OU se a senha não bate
+    if not usuario_db or usuario_db.senha != req.senha:
+        raise HTTPException(status_code=401, detail="Email ou senha inválidos")
+
+    # 3. Se passou pelas barreiras, o login é sucesso!
+    return {
+        "mensagem": f"Bem-vindo, {usuario_db.perfil}!",
+        "token": "token-jwt-simulado-12345"
+    }
     
     # Se errar a senha ou usuário não existir, devolve Erro 401 (Não Autorizado)
     raise HTTPException(status_code=401, detail="Email ou senha inválidos")
