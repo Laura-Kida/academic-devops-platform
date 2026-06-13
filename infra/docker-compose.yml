@@ -12,15 +12,13 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   auth-service:
-    build:
+    build: 
       context: ../services/auth-service
-    container_name: auth_service
     ports:
       - "8001:8000"
-    environment:
-      - DATABASE_URL=postgresql://admin:password@db:5432/academic_db
-    depends_on:
-      - db
+    volumes:
+      - ../services/auth-service:/app  # Isso sincroniza o seu código em tempo real!
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
   academic-service:
     build:
