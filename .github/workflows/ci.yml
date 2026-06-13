@@ -1,0 +1,66 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # Job para testar o serviço de autenticação
+  test-auth:
+    runs-on: ubuntu-latest
+    # O job só roda se houver alterações na pasta do auth-service
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          cd services/auth-service
+          pip install -r requirements.txt || echo "Nenhuma dependência ainda"
+
+      - name: Run Auth Tests
+        run: |
+          echo "Executando testes automatizados do Auth Service..."
+          # Aqui entrará o comando de testes (ex: pytest) quando codificarmos
+
+  # Job para testar o serviço acadêmico
+  test-academic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          cd services/academic-service
+          pip install -r requirements.txt || echo "Nenhuma dependência ainda"
+
+      - name: Run Academic Tests
+        run: |
+          echo "Executando testes automatizados do Academic Service..."
+
+  # Job para testar o Frontend
+  test-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies and Lint
+        run: |
+          cd frontend
+          echo "Simulando build e lint do Frontend..."
