@@ -14,11 +14,14 @@ services:
   auth-service:
     build: 
       context: ../services/auth-service
+    container_name: infra-auth-service-1
     ports:
       - "8001:8000"
     volumes:
-      - ../services/auth-service:/app  # Isso sincroniza o seu código em tempo real!
+      - ../services/auth-service:/app  # Sincroniza o código em tempo real
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      - db
 
   academic-service:
     build:
@@ -26,10 +29,13 @@ services:
     container_name: academic_service
     ports:
       - "8002:8000"
-    environment:
-      - DATABASE_URL=postgresql://admin:password@db:5432/academic_db
+    volumes:
+      - ../services/academic-service:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     depends_on:
       - db
+
+ 
 
   frontend:
     build:
@@ -37,6 +43,13 @@ services:
     container_name: frontend_web
     ports:
       - "3000:3000"
+    volumes:
+      - ../frontend:/app          # CORREÇÃO: Mapeia os arquivos do seu Windows para dentro do container
+      - /app/node_modules    
+      - /app/.vite     # Evita que o Docker delete ou misture as dependências locais
+    working_dir: /app             # Define onde o comando abaixo vai rodar lá dentro
+    # CORREÇÃO: Diz ao contêiner para iniciar o servidor de desenvolvimento do seu projeto (Vite/React)
+    #command: tail -f /dev/null
     environment:
       - VITE_AUTH_API_URL=http://localhost:8001
       - VITE_ACADEMIC_API_URL=http://localhost:8002
