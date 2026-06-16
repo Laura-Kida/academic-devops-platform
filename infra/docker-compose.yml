@@ -17,7 +17,7 @@ services:
     ports:
       - "8001:8000"
     volumes:
-      - ../services/auth-service:/app  # Isso sincroniza o seu código em tempo real!
+      - ../services/auth-service:/app  # Sincroniza o código em tempo real
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
   academic-service:
@@ -30,6 +30,9 @@ services:
       - DATABASE_URL=postgresql://admin:password@db:5432/academic_db
     depends_on:
       - db
+    volumes:
+      - ../services/academic-service:/app  # Sincroniza o código do academic em tempo real
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
   frontend:
     build:
@@ -43,6 +46,9 @@ services:
     depends_on:
       - auth-service
       - academic-service
+    volumes:
+      - ../frontend:/app  # Sincroniza o código React em tempo real
+      - /app/node_modules # Protege as bibliotecas do Node de conflitos com sua máquina
 
 volumes:
   postgres_data:
