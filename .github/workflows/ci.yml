@@ -7,48 +7,42 @@ on:
     branches: [ main, develop ]
 
 jobs:
-  # Job para testar o serviço de autenticação com Docker e Banco de Dados
   test-auth:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v3
-      
-      - name: Subir a infraestrutura (Docker)
+
+      - name: Subir Auth Service e Banco
         run: docker compose -f infra/docker-compose.yml up -d --build auth-service db
 
-      - name: Aguardar o banco de dados iniciar
-        run: sleep 5
+      - name: Aguardar serviços iniciarem
+        run: sleep 10
 
-      - name: Executar testes automatizados (pytest)
-        # O parâmetro -T é obrigatório no GitHub Actions para não travar o terminal
+      - name: Executar testes do Auth Service
         run: docker compose -f infra/docker-compose.yml exec -T auth-service pytest
 
-  # Job para testar o serviço acadêmico (Mantido com a estrutura base por enquanto)
   test-academic:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v3
-      
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
 
-      - name: Install Dependencies
-        run: |
-          cd services/academic-service
-          pip install -r requirements.txt || echo "Nenhuma dependência ainda"
+      - name: Subir Academic, Auth e Banco
+        run: docker compose -f infra/docker-compose.yml up -d --build academic-service auth-service db
 
-      - name: Run Academic Tests
-        run: |
-          echo "Executando testes automatizados do Academic Service..."
+      - name: Aguardar serviços iniciarem
+        run: sleep 10
 
-  # Job para testar o Frontend (Mantido com a estrutura base por enquanto)
+      - name: Executar testes do Academic Service
+        run: docker compose -f infra/docker-compose.yml exec -T academic-service pytest
+
   test-frontend:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
