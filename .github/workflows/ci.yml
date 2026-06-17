@@ -2,9 +2,9 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 jobs:
   test-auth:
@@ -16,8 +16,12 @@ jobs:
       - name: Subir Auth Service e Banco
         run: docker compose -f infra/docker-compose.yml up -d --build auth-service db
 
-      - name: Aguardar serviços iniciarem
-        run: sleep 10
+      - name: Aguardar PostgreSQL
+        run: |
+          until docker compose -f infra/docker-compose.yml exec -T db pg_isready -U admin -d academic_db; do
+            echo "Aguardando PostgreSQL..."
+            sleep 2
+          done
 
       - name: Executar testes do Auth Service
         run: docker compose -f infra/docker-compose.yml exec -T auth-service pytest
@@ -28,11 +32,18 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Subir Academic, Auth e Banco
-        run: docker compose -f infra/docker-compose.yml up -d --build academic-service auth-service db
+      - name: Subir DB e Auth
+        run: docker compose -f infra/docker-compose.yml up -d --build db auth-service
 
-      - name: Aguardar serviços iniciarem
-        run: sleep 10
+      - name: Aguardar PostgreSQL
+        run: |
+          until docker compose -f infra/docker-compose.yml exec -T db pg_isready -U admin -d academic_db; do
+            echo "Aguardando PostgreSQL..."
+            sleep 2
+          done
+
+      - name: Subir Academic Service
+        run: docker compose -f infra/docker-compose.yml up -d --build academic-service
 
       - name: Verificar containers
         run: docker compose -f infra/docker-compose.yml ps
@@ -52,7 +63,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: "18"
 
       - name: Install Dependencies and Lint
         run: |
