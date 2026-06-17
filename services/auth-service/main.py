@@ -81,3 +81,11 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
     
     # Se errar a senha ou usuário não existir, devolve Erro 401 (Não Autorizado)
     raise HTTPException(status_code=401, detail="Email ou senha inválidos")
+@app.post("/validate")
+def validate_token(token_data: dict):
+    token = token_data.get("token")
+
+    if token == "token-jwt-simulado-12345":
+        return {"valid": True}
+
+    return {"valid": False}

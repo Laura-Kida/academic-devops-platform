@@ -1,15 +1,82 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, Header, HTTPException
+from sqlalchemy.orm import Session
+from schemas import CourseCreate
+from database import engine, get_db
+from models import Base, Course
+from auth_client import validate_token
 
 app = FastAPI(title="Academic Service")
+
+def verify_user(
+    authorization: str = Header(None)
+):
+    if not authorization:
+        raise HTTPException(
+            status_code=401,
+            detail="Token ausente"
+        )
+
+    token = authorization.replace(
+        "Bearer ",
+        ""
+    )
+
+    result = validate_token(token)
+
+    if not result.get("valid"):
+        raise HTTPException(
+            status_code=401,
+            detail="Token inválido"
+        )
+
+    return True
+Base.metadata.create_all(bind=engine)
+
 
 @app.get("/")
 def root():
     return {"service": "academic-service"}
 
+
+@app.get("/health")
+def health():
+    return {
+        "status": "ok",
+        "service": "academic-service"
+    }
+
+
 @app.get("/courses")
-def get_courses():
-    return [
-        {"id": 1, "name": "Engenharia da Computação"},
-        {"id": 2, "name": "Ciência da Computação"},
-        {"id": 3, "name": "Sistemas de Informação"}
-    ]
+def get_courses(
+    user=Depends(verify_user),
+    db: Session = Depends(get_db)
+):
+    return db.query(Course).all()
+
+@app.post("/courses")
+def create_course(
+    course: CourseCreate,
+    user=Depends(verify_user),
+    db: Session = Depends(get_db)
+):
+    new_course = Course(
+        name=course.name
+    )
+
+    db.add(new_course)
+    db.commit()
+    db.refresh(new_course)
+
+    return new_course
+
+@app.get("/courses/{course_id}")
+def get_course(
+    course_id: int,
+    user=Depends(verify_user),
+    db: Session = Depends(get_db)
+):
+    return (
+        db.query(Course)
+        .filter(Course.id == course_id)
+        .first()
+    )
