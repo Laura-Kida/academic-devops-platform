@@ -6,8 +6,8 @@ const ACADEMIC_API =
   import.meta.env.VITE_ACADEMIC_API_URL || "http://localhost:8002"
 
 function App() {
-  const [email, setEmail] = useState("aluno@escola.br")
-  const [senha, setSenha] = useState("senha123")
+  const [email, setEmail] = useState("")
+  const [senha, setSenha] = useState("")
   const [perfil, setPerfil] = useState("aluno")
   const [token, setToken] = useState(localStorage.getItem("token") || "")
   const [courses, setCourses] = useState([])
@@ -159,7 +159,7 @@ function App() {
             <input
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="aluno@escola.br"
+              placeholder="Digite seu email"
             />
 
             <label>Senha</label>
@@ -167,7 +167,7 @@ function App() {
               type="password"
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
-              placeholder="senha123"
+              placeholder="Digite sua senha"
             />
 
             <label>Perfil</label>
@@ -191,11 +191,7 @@ function App() {
               )}
             </div>
 
-            {token && (
-              <p className="token">
-                Token ativo: <strong>{token}</strong>
-              </p>
-            )}
+            {token && <p className="token">Usuário autenticado com sucesso.</p>}
           </div>
 
           <div className="panel">
