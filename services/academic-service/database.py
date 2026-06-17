@@ -1,11 +1,19 @@
+import os
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
-import os
+
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
     "postgresql://admin:password@db:5432/academic_db"
 )
+
+# Algumas plataformas podem fornecer a URL começando com postgres://
+# O SQLAlchemy prefere postgresql://
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
 
 engine = create_engine(DATABASE_URL)
 
@@ -16,6 +24,7 @@ SessionLocal = sessionmaker(
 )
 
 Base = declarative_base()
+
 
 def get_db():
     db = SessionLocal()
