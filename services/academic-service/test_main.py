@@ -1,7 +1,13 @@
 from fastapi.testclient import TestClient
-from main import app
+
+from main import app, verify_user
+
 
 client = TestClient(app)
+
+
+def fake_verify_user():
+    return True
 
 
 def test_root():
@@ -20,11 +26,10 @@ def test_courses_without_token():
 
 
 def test_courses_with_valid_token():
-    response = client.get(
-        "/courses",
-        headers={
-            "Authorization": "Bearer token-jwt-simulado-12345"
-        }
-    )
+    app.dependency_overrides[verify_user] = fake_verify_user
+
+    response = client.get("/courses")
+
+    app.dependency_overrides.clear()
 
     assert response.status_code == 200
