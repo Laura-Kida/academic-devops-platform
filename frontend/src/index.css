@@ -109,3 +109,25 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.danger {
+  background: #ef4444;
+}
+
+.secondary {
+  background: #6b7280;
+}
