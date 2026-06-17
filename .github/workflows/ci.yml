@@ -22,26 +22,27 @@ jobs:
       - name: Executar testes do Auth Service
         run: docker compose -f infra/docker-compose.yml exec -T auth-service pytest
 
-test-academic:
-  runs-on: ubuntu-latest
+  test-academic:
+    runs-on: ubuntu-latest
 
-  steps:
-    - uses: actions/checkout@v3
+    steps:
+      - uses: actions/checkout@v3
 
-    - name: Subir Academic, Auth e Banco
-      run: docker compose -f infra/docker-compose.yml up -d --build academic-service auth-service db
+      - name: Subir Academic, Auth e Banco
+        run: docker compose -f infra/docker-compose.yml up -d --build academic-service auth-service db
 
-    - name: Aguardar serviços iniciarem
-      run: sleep 10
+      - name: Aguardar serviços iniciarem
+        run: sleep 10
 
-    - name: Verificar containers
-      run: docker compose -f infra/docker-compose.yml ps
+      - name: Verificar containers
+        run: docker compose -f infra/docker-compose.yml ps
 
-    - name: Logs do Academic Service
-      run: docker compose -f infra/docker-compose.yml logs academic-service
+      - name: Logs do Academic Service
+        run: docker compose -f infra/docker-compose.yml logs academic-service
 
-    - name: Executar testes do Academic Service
-      run: docker compose -f infra/docker-compose.yml exec -T academic-service pytest
+      - name: Executar testes do Academic Service
+        run: docker compose -f infra/docker-compose.yml exec -T academic-service pytest
+
   test-frontend:
     runs-on: ubuntu-latest
 
