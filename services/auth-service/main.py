@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from fastapi.middleware.cors import CORSMiddleware
 
 # Importamos os arquivos que acabamos de criar
 import models
@@ -11,6 +12,13 @@ models.Base.metadata.create_all(bind=engine)
 
 # Inicializa a aplicação FastAPI
 app = FastAPI(title="Auth Service", description="Microsserviço de Autenticação Acadêmica")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Definindo o Modelo de Dados (Como esperamos receber a requisição)
 class LoginRequest(BaseModel):

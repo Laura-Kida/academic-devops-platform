@@ -4,8 +4,16 @@ from schemas import CourseCreate
 from database import engine, get_db
 from models import Base, Course
 from auth_client import validate_token
-
+from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI(title="Academic Service")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 def verify_user(
     authorization: str = Header(None)
