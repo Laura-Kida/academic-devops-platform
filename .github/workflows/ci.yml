@@ -104,18 +104,18 @@ jobs:
         with:
           context: ./services/auth-service
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/auth-service:latest
+          tags: ghcr.io/laura-kida/auth-service:latest
 
       - name: Build and Push Academic Service
         uses: docker/build-push-action@v6
         with:
           context: ./services/academic-service
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/academic-service:latest
+          tags: ghcr.io/laura-kida/academic-service:latest
 
       - name: Build and Push Frontend
         uses: docker/build-push-action@v6
         with:
           context: ./frontend
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/frontend:latest
+          tags: ghcr.io/laura-kida/frontend:latest
