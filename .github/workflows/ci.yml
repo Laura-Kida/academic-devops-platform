@@ -1,4 +1,4 @@
-name: CI Pipeline
+name: CI/CD Pipeline
 
 on:
   push:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Subir Auth Service e Banco
         run: docker compose -f infra/docker-compose.yml up -d --build auth-service db
@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Subir DB e Auth
         run: docker compose -f infra/docker-compose.yml up -d --build db auth-service
@@ -58,14 +58,64 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: "22"
 
-      - name: Install Dependencies and Lint
+      - name: Install Dependencies
         run: |
           cd frontend
-          echo "Simulando build e lint do Frontend..."
+          npm ci
+
+      - name: Build Frontend
+        run: |
+          cd frontend
+          npm run build
+
+  publish-images:
+    if: github.event_name == 'push'
+
+    needs:
+      - test-auth
+      - test-academic
+      - test-frontend
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Auth Service
+        uses: docker/build-push-action@v6
+        with:
+          context: ./services/auth-service
+          push: true
+          tags: ghcr.io/laura-kida/auth-service:latest
+
+      - name: Build and Push Academic Service
+        uses: docker/build-push-action@v6
+        with:
+          context: ./services/academic-service
+          push: true
+          tags: ghcr.io/laura-kida/academic-service:latest
+
+      - name: Build and Push Frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          push: true
+          tags: ghcr.io/laura-kida/frontend:latest
