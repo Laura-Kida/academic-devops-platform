@@ -1,4 +1,5 @@
 import logging
+import os
 
 from fastapi import FastAPI, Depends, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -29,12 +30,20 @@ app = FastAPI(title="Academic Service")
 
 
 # Configuração de CORS
+FRONTEND_URL = os.getenv(
+    "FRONTEND_URL",
+    "http://localhost:3000"
+)
+
+allowed_origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    FRONTEND_URL,
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-    ],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -115,7 +124,9 @@ def create_course(
     db.commit()
     db.refresh(new_course)
 
-    logger.info(f"Curso criado com sucesso: {new_course.name} | ID: {new_course.id}")
+    logger.info(
+        f"Curso criado com sucesso: {new_course.name} | ID: {new_course.id}"
+    )
 
     return new_course
 
