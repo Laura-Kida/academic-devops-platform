@@ -81,3 +81,170 @@ classDiagram
         +dataEntrega
         +nota
     }
+
+    ## 4. Deploy e Observabilidade — Sprint 3
+
+Na Sprint 3, a aplicação foi publicada em ambiente externo utilizando a plataforma Render. A arquitetura foi mantida em serviços separados, seguindo a proposta de microsserviços da plataforma acadêmica.
+
+### Serviços publicados
+
+* **Frontend React/Vite:** https://academic-devops-platform.onrender.com
+* **Auth Service:** https://auth-service-9bwb.onrender.com
+* **Academic Service:** https://academic-service-71ed.onrender.com
+* **Banco de Dados:** PostgreSQL gerenciado pelo Render
+
+### Arquitetura em Produção
+
+```text
+Frontend React/Vite
+        |
+        | REST API
+        v
+Auth Service
+        |
+        v
+PostgreSQL
+
+Frontend React/Vite
+        |
+        | REST API com token
+        v
+Academic Service
+        |
+        | valida token
+        v
+Auth Service
+        |
+        v
+PostgreSQL
+```
+
+### Fluxo de Autenticação
+
+1. O usuário acessa o frontend publicado no Render.
+2. O usuário realiza cadastro ou login.
+3. O frontend envia as credenciais para o Auth Service.
+4. O Auth Service valida o usuário e retorna um token.
+5. O frontend envia esse token nas requisições para o Academic Service.
+6. O Academic Service valida o token consultando o Auth Service.
+7. Se o token for válido, o Academic Service libera o acesso aos cursos.
+
+### Health Checks
+
+Os microsserviços possuem endpoints de health check para verificar se estão ativos:
+
+* Auth Service: https://auth-service-9bwb.onrender.com/health
+* Academic Service: https://academic-service-71ed.onrender.com/health
+
+Exemplo de resposta esperada:
+
+```json
+{
+  "status": "ok",
+  "service": "auth-service"
+}
+```
+
+### Métricas
+
+Também foram adicionadas métricas básicas no formato Prometheus:
+
+* Auth Metrics: https://auth-service-9bwb.onrender.com/metrics
+* Academic Metrics: https://academic-service-71ed.onrender.com/metrics
+
+As métricas permitem observar informações como:
+
+* quantidade de requisições por rota;
+* status HTTP das respostas;
+* tempo de resposta;
+* uso básico de CPU e memória do processo.
+
+Exemplo de métrica:
+
+```text
+http_requests_total{handler="/health",method="GET",status="2xx"} 1.0
+```
+
+### Logs
+
+Os microsserviços também registram logs para eventos importantes da aplicação, como:
+
+* acesso ao health check;
+* cadastro de usuário;
+* login realizado;
+* tentativa de login inválida;
+* validação de token;
+* acesso negado por token ausente;
+* listagem de cursos;
+* criação de curso.
+
+Esses logs podem ser acompanhados diretamente no painel do Render, na aba **Logs** de cada serviço.
+
+### Variáveis de Ambiente
+
+Para separar o ambiente local do ambiente de produção, foram utilizadas variáveis de ambiente.
+
+#### Auth Service
+
+```text
+DATABASE_URL
+FRONTEND_URL
+PYTHON_VERSION
+```
+
+#### Academic Service
+
+```text
+DATABASE_URL
+AUTH_SERVICE_URL
+FRONTEND_URL
+PYTHON_VERSION
+```
+
+#### Frontend
+
+```text
+VITE_AUTH_API_URL
+VITE_ACADEMIC_API_URL
+```
+
+### Como testar o sistema online
+
+1. Acessar o frontend: https://academic-devops-platform.onrender.com
+2. Criar um cadastro.
+3. Fazer login.
+4. Atualizar a lista de cursos.
+5. Criar um novo curso.
+6. Verificar se o curso aparece na lista.
+
+Também é possível testar diretamente os serviços:
+
+```bash
+curl https://auth-service-9bwb.onrender.com/health
+curl https://academic-service-71ed.onrender.com/health
+```
+
+Teste de rota protegida sem token:
+
+```bash
+curl https://academic-service-71ed.onrender.com/courses
+```
+
+Resposta esperada:
+
+```json
+{
+  "detail": "Token ausente"
+}
+```
+
+Teste de rota protegida com token:
+
+```bash
+curl -X GET https://academic-service-71ed.onrender.com/courses \
+-H "Authorization: Bearer token-jwt-simulado-12345"
+```
+
+### Resultado da Sprint 3
+
+Com essa etapa, a aplicação passou a contar com deploy externo, banco de dados gerenciado, variáveis de ambiente, logs, health checks e métricas básicas, aproximando o projeto de uma arquitetura DevOps mais completa.
