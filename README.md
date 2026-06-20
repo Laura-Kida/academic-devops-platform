@@ -8,25 +8,23 @@ O sistema foi desenhado para ser uma plataforma escalável de gerenciamento acad
 
 **Decisões Técnicas:**
 
-* **Frontend:** Aplicação Web isolada (React/Vite).
-
-* **Backend:** Microsserviços independentes desenvolvidos em Python (FastAPI), comunicando-se via API REST.
-
-* **Banco de Dados:** PostgreSQL, adotado para garantir a integridade dos relacionamentos complexos do domínio acadêmico.
-
-* **Infraestrutura:** Ambiente local gerenciado via `docker-compose`, com `Dockerfile` exclusivo para cada serviço.
+* **Frontend:** Aplicação Web isolada desenvolvida com React e Vite.
+* **Backend:** Microsserviços independentes desenvolvidos em Python com FastAPI, comunicando-se via API REST.
+* **Banco de Dados:** PostgreSQL, adotado para garantir persistência dos dados da plataforma.
+* **Infraestrutura:** Ambiente local gerenciado via `docker-compose`, com serviços separados para frontend, backend e banco de dados.
+* **Deploy:** Publicação dos serviços em ambiente externo utilizando a plataforma Render.
 
 ## 2. Definição dos Microsserviços
 
 A plataforma atende à exigência mínima de serviços com a seguinte divisão:
 
-* **auth-service:** Microsserviço focado em segurança. Gerencia a entidade Usuário e é responsável pela autenticação simples do sistema.
+* **auth-service:** Microsserviço focado em autenticação. Gerencia usuários, cadastro, login e validação de token.
 
-* **academic-service:** Microsserviço focado na regra de negócio (Core). Gerencia as entidades de Alunos, Professores, Disciplinas, Turmas, Matrículas e Atividades.
+* **academic-service:** Microsserviço focado na regra de negócio acadêmica. Nesta versão, gerencia cursos e protege suas rotas por meio da validação de token no Auth Service.
 
 ## 3. Modelo Conceitual
 
-Abaixo está a representação UML das entidades e relacionamentos do banco de dados relacional:
+Abaixo está a representação UML planejada para a evolução do domínio acadêmico da plataforma:
 
 ```mermaid
 classDiagram
@@ -48,41 +46,51 @@ classDiagram
         +senha
         +tipo
     }
+
     class Professor {
         +siape
         +departamento
     }
+
     class Aluno {
         +matricula
         +curso
     }
+
     class Disciplina {
         +id
         +nome
         +codigo
         +cargaHoraria
     }
+
     class Turma {
         +id
         +semestre
         +horario
     }
+
     class Matricula {
         +data
         +status
     }
+
     class Atividade {
         +id
         +titulo
         +descricao
         +prazo
     }
+
     class Entrega {
         +dataEntrega
         +nota
     }
+```
 
-    ## 4. Deploy e Observabilidade — Sprint 3
+Na implementação atual da Sprint 3, o sistema possui as entidades principais de **Usuário** e **Curso**, com persistência em PostgreSQL e comunicação entre microsserviços.
+
+## 4. Deploy e Observabilidade — Sprint 3
 
 Na Sprint 3, a aplicação foi publicada em ambiente externo utilizando a plataforma Render. A arquitetura foi mantida em serviços separados, seguindo a proposta de microsserviços da plataforma acadêmica.
 
